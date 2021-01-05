@@ -5,6 +5,225 @@ keywords: changelog, release-notes, migration
 permalink: changelog.html
 toc: true
 ---
+#### 1.14.1 - 2020-09-30
+
+##### Changelog
+
+- Write recipe to compare user and default config - #3065 - [#3114](https://github.com/detekt/detekt/pull/3114)
+- Improve description of AbsentOrWrongFileLicense rule - [#3109](https://github.com/detekt/detekt/pull/3109)
+- Report Unit returned by method implementations in interfaces - [#3108](https://github.com/detekt/detekt/pull/3108)
+- Change OptionalUnit to report Unit returned by method implementations in interfaces - [#3099](https://github.com/detekt/detekt/issues/3099)
+- 1.13.0 changes to detektGenerateConfig - [#3065](https://github.com/detekt/detekt/issues/3065)
+- detekt 1.12.0 and org.springframework.boot 2.2.6.RELEASE clash - [#3058](https://github.com/detekt/detekt/issues/3058)
+
+##### Housekeeping & Refactorings
+
+- Update mockk to 1.10.2 - [#3113](https://github.com/detekt/detekt/pull/3113)
+- Refactoring: Use indices syntax in loop - [#3112](https://github.com/detekt/detekt/pull/3112)
+- Specify type explicitly in DetektCreateBaselineTask - [#3111](https://github.com/detekt/detekt/pull/3111)
+- Refactoring: Class member can have private visibility - [#3110](https://github.com/detekt/detekt/pull/3110)
+- Fix kotlin-reflect problem for idea plugin - [#3107](https://github.com/detekt/detekt/pull/3107)
+
+See all issues at: [1.14.1](https://github.com/detekt/detekt/milestone/77)
+
+#### 1.14.0 - 2020-09-26
+
+##### Notable Changes
+
+- New standard rules: `ReplaceSafeCallChainWithRun`, `ClassOrdering`, `SuspendFunWithFlowReturnType`
+- New experimental KtLint rules: `AnnotationSpacing`, `ArgumentListWrapping`
+
+##### Changelog
+
+- Add additional classpaths to KtTestCompiler - [#3101](https://github.com/detekt/detekt/pull/3101)
+- New rule: SuspendFunWithFlowReturnType - [#3098](https://github.com/detekt/detekt/pull/3098)
+- Fix formatting issues have no absolute path - #3063 - [#3097](https://github.com/detekt/detekt/pull/3097)
+- Fix false positive (+= overload) in UnusedPrivateMember - [#3094](https://github.com/detekt/detekt/pull/3094)
+- Update RedundantVisibilityModifierRule to find redundant internal modifiers - [#3092](https://github.com/detekt/detekt/pull/3092)
+- New rule: ReplaceSafeCallChainWithRun - [#3089](https://github.com/detekt/detekt/pull/3089)
+- New rule: ClassOrdering - [#3088](https://github.com/detekt/detekt/pull/3088)
+- Use File.pathSeparator to split entries in classpath - [#3084](https://github.com/detekt/detekt/pull/3084)
+- Wrap new KtLint rules - [#3083](https://github.com/detekt/detekt/pull/3083)
+- Wrap KtLint AnnotationSpacingRule - [#3081](https://github.com/detekt/detekt/issues/3081)
+- Wrap KtLint ArgumentListWrappingRule - [#3080](https://github.com/detekt/detekt/issues/3080)
+- UnusedImports rule: fix false positives when type resolution is enabled - [#3079](https://github.com/detekt/detekt/pull/3079)
+- Move SNAPSHOT from artifactory to sonatype - [#3076](https://github.com/detekt/detekt/pull/3076)
+- Update KtLint to 0.39.0 - [#3075](https://github.com/detekt/detekt/pull/3075)
+- UnusedImports: Lots of false positives - [#3074](https://github.com/detekt/detekt/issues/3074)
+- Update dependency badge to maven central - [#3072](https://github.com/detekt/detekt/pull/3072)
+- Simplify reporting message for IgnoredReturnValue - [#3068](https://github.com/detekt/detekt/pull/3068)
+- Add ability to pass rootclasspaths to KtTestCompiler - [#3066](https://github.com/detekt/detekt/issues/3066)
+- MagicNumber rule: don't check Character, Boolean and null - [#3064](https://github.com/detekt/detekt/pull/3064)
+- KtLint formatting checks do not include full path in report - [#3063](https://github.com/detekt/detekt/issues/3063)
+- IgnoredReturnValue should only report name of method/function called - [#3052](https://github.com/detekt/detekt/issues/3052)
+
+##### Housekeeping & Refactorings
+
+- Update jacoco with Java 15 support - [#3105](https://github.com/detekt/detekt/pull/3105)
+- Update project dependencies - [#3104](https://github.com/detekt/detekt/pull/3104)
+- Enable parallel spek test discovery - [#3090](https://github.com/detekt/detekt/pull/3090)
+- Update Gradle to 6.7-rc-2 - [#3071](https://github.com/detekt/detekt/pull/3071)
+- Update spek framework to 2.0.13 - [#3070](https://github.com/detekt/detekt/pull/3070)
+- Update kramdown dependency due to a vulnerability - [#3069](https://github.com/detekt/detekt/pull/3069)
+- Add test asserting the report message - [#3061](https://github.com/detekt/detekt/pull/3061)
+
+See all issues at: [1.14.0](https://github.com/detekt/detekt/milestone/76)
+
+#### 1.13.1 - 2020-09-13
+
+##### Notable Changes
+
+We now publish directly to maven central.
+The 1.13.0 release got corrupted and should not be used.
+
+#### 1.13.0 - 2020-09-07
+
+##### Migration
+
+- This release drops several deprecations in `detekt-api`.
+
+##### Changelog
+
+- Set modifier order based on Kotlin coding conventions - [#3056](https://github.com/detekt/detekt/pull/3056)
+- FunctionNaming: allow anonymous functions - [#3055](https://github.com/detekt/detekt/pull/3055)
+- FunctionNaming should ignore anonymous functions - [#3054](https://github.com/detekt/detekt/issues/3054)
+- Fix ModifierOrder for false positive reported by ModifierOrder when using fun interfaces - [#3051](https://github.com/detekt/detekt/pull/3051)
+- False positive reported by ModifierOrder when using fun interfaces - [#3050](https://github.com/detekt/detekt/issues/3050)
+- Fix PreferToOverPairSyntax exception - [#3046](https://github.com/detekt/detekt/pull/3046)
+- PreferToOverPairSyntax throws exceptions - [#3044](https://github.com/detekt/detekt/issues/3044)
+- Remove deprecated entity and location members - [#3037](https://github.com/detekt/detekt/pull/3037)
+- Respect configured config file when running the detektCreateConfig task - [#3036](https://github.com/detekt/detekt/pull/3036)
+- Remove last years api deprecations - [#3035](https://github.com/detekt/detekt/pull/3035)
+- UnusedImports rule: fix false negative when same name identifiers are imported and used - [#3033](https://github.com/detekt/detekt/pull/3033)
+- ForbiddenMethodCall: report operator calls - [#3032](https://github.com/detekt/detekt/pull/3032)
+- Improve documentation for Gradle repositories setup - [#3030](https://github.com/detekt/detekt/pull/3030)
+- how to use the type resolution to make ForbiddenMethodCall to check bigdecimal.equals using bigdecimal == bigdecimal? - [#3029](https://github.com/detekt/detekt/issues/3029)
+- Use lazy gradle APIs in docs - [#3028](https://github.com/detekt/detekt/pull/3028)
+- Implement option to turn config property deprecation warnings as errors - [#3026](https://github.com/detekt/detekt/pull/3026)
+- Fix RedundantSuspendModifier message - [#3025](https://github.com/detekt/detekt/pull/3025)
+- Print filtered paths in debug mode for easier bug tracing - [#3022](https://github.com/detekt/detekt/pull/3022)
+- Unused import not detected - [#3020](https://github.com/detekt/detekt/issues/3020)
+- Include reports and formatting features to the system test - [#3018](https://github.com/detekt/detekt/pull/3018)
+- detektGenerateConfig ignores detekt.config paramenter - [#2565](https://github.com/detekt/detekt/issues/2565)
+- Treat config property deprecations as errors - [#2545](https://github.com/detekt/detekt/issues/2545)
+- Print filtered paths in debug mode - [#869](https://github.com/detekt/detekt/issues/869)
+
+##### Housekeeping & Refactorings
+
+- Remove confusing annotation for UnusedImports rule - [#3039](https://github.com/detekt/detekt/pull/3039)
+- Remove obsolete signature workaround for formatting plugin - [#3038](https://github.com/detekt/detekt/pull/3038)
+- Upgrade to new dokka - [#2931](https://github.com/detekt/detekt/pull/2931)
+
+See all issues at: [1.13.0](https://github.com/detekt/detekt/milestone/75)
+
+#### 1.12.0 - 2020-08-25
+
+##### Notable Changes
+
+- Kotlin 1.4 support
+- New rules: `UseCheckNotNull`, `UseRequireNotNull`, `NonBooleanPropertyPrefixedWithIs`
+- The Gradle plugin now requires at least Gradle 5.4. This aligns with Kotlin's Gradle plugin.
+- The Gradle plugin now supports configuration avoidance
+- The Gradle plugin now generates additional detekt tasks for Android projects
+- KtLint 0.38.1 support (via detekt-formatting)
+
+##### Migration
+
+- `ArrayPrimitive` rule is more precise but requires type resolution now.
+- The deprecated `customReports` property of the Gradle plugin got removed.
+- Deprecated properties `xmlReportFile`, `htmlReportFile`, `txtReportFile` are now internal.
+
+Note the default `gradle detekt` task does not run over test sources.
+To include test sources following setup can be used:
+
+```kt
+detekt {
+    // ...
+    input = objects.fileCollection().from(
+        "src/main/java",
+        "src/test/java",
+        "src/main/kotlin",
+        "src/test/kotlin"
+    )
+}
+```
+
+This does not apply to `gradle detektTest`.
+We encourage to also check test sources.  
+We will include test sources by default in detekt `1.15.0` or later.
+
+##### Changelog
+
+- Consolidate working for Type Resolution - [#3011](https://github.com/detekt/detekt/pull/3011)
+- ArrayPrimitive rule: report variable/receiver types and factory methods - [#3009](https://github.com/detekt/detekt/pull/3009)
+- Add requiresTypeResolution annotation to UseCheckNotNull/UseRequireNotNull - [#3008](https://github.com/detekt/detekt/pull/3008)
+- Update kotlinx.html dependencies - [#3007](https://github.com/detekt/detekt/pull/3007)
+- Do not overwrite bintray publication - [#3006](https://github.com/detekt/detekt/pull/3006)
+- Update Ktlint to 0.38.0 - [#3004](https://github.com/detekt/detekt/pull/3004)
+- Add UseRequireNotNull/UseCheckNotNull rules - [#3003](https://github.com/detekt/detekt/pull/3003)
+- Workaround config - [#3001](https://github.com/detekt/detekt/pull/3001)
+- Replace `require(x != null)` with `requireNotNull(x)` - [#2998](https://github.com/detekt/detekt/issues/2998)
+- Minor Gradle plugin cleanup - [#2997](https://github.com/detekt/detekt/pull/2997)
+- detekt-gradle-plugin has two publishing configuration - [#2996](https://github.com/detekt/detekt/issues/2996)
+- Introduce @requiresTypeResolution to KDoc for rules - [#2993](https://github.com/detekt/detekt/pull/2993)
+- Fix support for Gradle configuration cache - [#2992](https://github.com/detekt/detekt/pull/2992)
+- Fix false positive for UnnecessaryLet with disabled type resolution - [#2991](https://github.com/detekt/detekt/pull/2991)
+- Deprecation: False positive with Kotlin 1.4.0 - [#2990](https://github.com/detekt/detekt/issues/2990)
+- False positive in UnnecessaryLet - [#2987](https://github.com/detekt/detekt/issues/2987)
+- Gradle plugin fixes - [#2986](https://github.com/detekt/detekt/pull/2986)
+- Remove deprecated customReports detekt task property - #2811 - [#2944](https://github.com/detekt/detekt/pull/2944)
+- Rename IsPropertyNaming to NonBooleanPropertyPrefixedWithIs? - [#2819](https://github.com/detekt/detekt/pull/2819)
+- Add automatic detekt tasks for Android Plugins - [#2787](https://github.com/detekt/detekt/pull/2787)
+
+##### Housekeeping & Refactorings
+
+- Update Gradle to 6.6.1 - [#3016](https://github.com/detekt/detekt/pull/3016)
+- Run detekt with type resolution analysis on CI - [#3015](https://github.com/detekt/detekt/pull/3015)
+- Run Gradle Android tests conditionally when sdk path is defined - [#3014](https://github.com/detekt/detekt/pull/3014)
+- Fix documentation for NonBooleanPropertyPrefixedWithIs - [#3012](https://github.com/detekt/detekt/pull/3012)
+- Run detekt on all test sources - [#3010](https://github.com/detekt/detekt/pull/3010)
+- Do not publish test fixture; removing warning - [#3005](https://github.com/detekt/detekt/pull/3005)
+- Implement custom rule to check spek test discovery performance issues - [#2954](https://github.com/detekt/detekt/pull/2954)
+
+See all issues at: [1.12.0](https://github.com/detekt/detekt/milestone/71)
+
+#### 1.12.0-RC1 - 2020-08-20
+
+##### Notable Changes
+
+The Gradle plugin now requires at least Gradle 5.4. This aligns with Kotlin's Gradle plugin.
+
+##### Changelog
+
+- Support Kotlin 1.4 - [#2981](https://github.com/detekt/detekt/pull/2981)
+- 1.10.0 to 1.11.0 | Could not find org.spekframework.spek2:spek-dsl-jvm - [#2976](https://github.com/detekt/detekt/issues/2976)
+- Make a release built against Kotlin 1.4 - [#2974](https://github.com/detekt/detekt/issues/2974)
+- Roll back to non snapshot spek version - [#2922](https://github.com/detekt/detekt/pull/2922)
+
+See all issues at: [1.12.0-RC1](https://github.com/detekt/detekt/milestone/73)
+
+#### 1.11.2 - 2020-08-19
+
+##### Changelog
+
+- Fix formatting regression where issues printed the whole filename - [#2988](https://github.com/detekt/detekt/pull/2988)
+- Baseline adds file path instead package - [#2985](https://github.com/detekt/detekt/issues/2985)
+
+See all issues at: [1.11.2](https://github.com/detekt/detekt/milestone/74)
+
+#### 1.11.1 - 2020-08-18
+
+##### Changelog
+
+- Fix regression separating classpath entries - #2961 - [#2977](https://github.com/detekt/detekt/pull/2977)
+- Show groovy and kotlin dsl in the same page - [#2971](https://github.com/detekt/detekt/pull/2971)
+- Fix typo - [#2969](https://github.com/detekt/detekt/pull/2969)
+- UnnecessaryLet: fix false positive when let is used for destructuring - [#2968](https://github.com/detekt/detekt/pull/2968)
+- UnnecessaryLet false positive when let is used for destructuring - [#2966](https://github.com/detekt/detekt/issues/2966)
+- Merge gradle groovy dsl and kotlin dsl documentation in the same page - [#2846](https://github.com/detekt/detekt/issues/2846)
+- Run Detekt as Kotlin Compiler Plugin - [#2119](https://github.com/detekt/detekt/issues/2119)
+
+See all issues at: [1.11.1](https://github.com/detekt/detekt/milestone/72)
 
 #### 1.11.0 - 2020-08-13
 

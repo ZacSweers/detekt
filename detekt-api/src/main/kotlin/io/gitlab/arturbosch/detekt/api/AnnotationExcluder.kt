@@ -13,15 +13,16 @@ class AnnotationExcluder(
     private val excludes: List<String>
 ) {
 
-    constructor(root: KtFile, excludes: SplitPattern) : this(root, excludes.mapAll { it })
+    private val resolvedAnnotations = root.importList?.run {
+        imports
+            .asSequence()
+            .filterNot { it.isAllUnder }
+            .mapNotNull { it.importedFqName?.asString() }
+            .map { it.substringAfterLast('.') to it }
+            .toMap()
+    } ?: emptyMap()
 
-    private val resolvedAnnotations = root.importList
-            ?.imports
-            ?.asSequence()
-            ?.filterNot { it.isAllUnder }
-            ?.mapNotNull { it.importedFqName?.asString() }
-            ?.map { it.substringAfterLast('.') to it }
-            ?.toMap() ?: emptyMap()
+    constructor(root: KtFile, excludes: SplitPattern) : this(root, excludes.mapAll { it })
 
     /**
      * Is true if any given annotation name is declared in the SplitPattern

@@ -10,6 +10,51 @@ The Style ruleset provides rules that assert the style of the code.
 This will help keep code in line with the given
 code style guidelines.
 
+### ClassOrdering
+
+This rule ensures class contents are ordered as follows as recommended by the Kotlin
+[Coding Conventions](https://kotlinlang.org/docs/reference/coding-conventions.html#class-layout):
+- Property declarations and initializer blocks
+- Secondary constructors
+- Method declarations
+- Companion object
+
+**Severity**: Style
+
+**Debt**: 5min
+
+#### Noncompliant Code:
+
+```kotlin
+class OutOfOrder {
+    companion object {
+        const val IMPORTANT_VALUE = 3
+    }
+
+    fun returnX(): Int {
+        return x
+    }
+
+    private val x = 2
+}
+```
+
+#### Compliant Code:
+
+```kotlin
+class InOrder {
+    private val x = 2
+
+    fun returnX(): Int {
+        return x
+    }
+
+    companion object {
+        const val IMPORTANT_VALUE = 3
+    }
+}
+```
+
 ### CollapsibleIfStatements
 
 This rule detects `if` statements which can be collapsed. This can reduce nesting and help improve readability.
@@ -311,6 +356,8 @@ This rule allows to set a list of forbidden methods. This can be used to discour
 or deprecated methods, especially for methods imported from external libraries.
 Detekt will then report all methods invocation that are forbidden.
 
+**Requires Type Resolution**
+
 **Severity**: Style
 
 **Debt**: 10min
@@ -366,6 +413,8 @@ internal data class C(val a: String)
 This rule detects usages of `Void` and reports them as forbidden.
 The Kotlin type `Unit` should be used instead. This type corresponds to the `Void` class in Java
 and has only one value - the `Unit` object.
+
+**Requires Type Resolution**
 
 **Severity**: Style
 
@@ -882,6 +931,8 @@ This rule detects the usage of the Pair constructor to create pairs of values.
 
 Using <value1> to <value2> is preferred.
 
+**Requires Type Resolution**
+
 **Severity**: Style
 
 **Debt**: 5min
@@ -1255,6 +1306,8 @@ class Module(@Inject private val foo: String)
 `apply` expressions are used frequently, but sometimes their usage should be replaced with
 an ordinary method/extension function call to reduce visual complexity
 
+**Requires Type Resolution**
+
 **Severity**: Style
 
 **Debt**: 5min
@@ -1297,6 +1350,8 @@ class B : Object()
 `let` expressions are used extensively in our code for null-checking and chaining functions,
 but sometimes their usage should be replaced with a ordinary method/extension function call
 to reduce visual complexity
+
+**Requires Type Resolution**
 
 **Severity**: Style
 
@@ -1442,6 +1497,28 @@ The latter should be preferred as it is more readable.
 @NegativeCase(["..."])
 ```
 
+### UseCheckNotNull
+
+Turn on this rule to flag `check` calls for not-null check that can be replaced with a `checkNotNull` call.
+
+**Requires Type Resolution**
+
+**Severity**: Style
+
+**Debt**: 5min
+
+#### Noncompliant Code:
+
+```kotlin
+check(x != null)
+```
+
+#### Compliant Code:
+
+```kotlin
+checkNotNull(x)
+```
+
 ### UseCheckOrError
 
 Kotlin provides a much more concise way to check invariants as well as pre- and post conditions.
@@ -1517,6 +1594,8 @@ class A(val b: B) : I by b
 
 Instantiation of an object's "empty" state should use the object's "empty" initializer for clarity purposes.
 
+**Requires Type Resolution**
+
 **Severity**: Style
 
 **Debt**: 5min
@@ -1589,6 +1668,28 @@ requireNotNull(value) { "value should not be null" }
 require(value >= 0) { "value is $value but should be at least 0" }
 ```
 
+### UseRequireNotNull
+
+Turn on this rule to flag `require` calls for not-null check that can be replaced with a `requireNotNull` call.
+
+**Requires Type Resolution**
+
+**Severity**: Style
+
+**Debt**: 5min
+
+#### Noncompliant Code:
+
+```kotlin
+require(x != null)
+```
+
+#### Compliant Code:
+
+```kotlin
+requireNotNull(x)
+```
+
 ### UselessCallOnNotNull
 
 The Kotlin stdlib provides some functions that are designed to operate on references that may be null. These
@@ -1597,6 +1698,8 @@ the calls are redundant in this case and can be removed or should be changed to 
 the value is null or not.
 
 Rule adapted from Kotlin's IntelliJ plugin: https://github.com/JetBrains/kotlin/blob/f5d0a38629e7d2e7017ee645dc4d4bee60614e93/idea/src/org/jetbrains/kotlin/idea/inspections/collections/UselessCallOnNotNullInspection.kt
+
+**Requires Type Resolution**
 
 **Severity**: Performance
 

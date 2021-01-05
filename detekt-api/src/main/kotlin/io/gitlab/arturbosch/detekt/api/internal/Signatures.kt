@@ -8,7 +8,6 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
 import org.jetbrains.kotlin.psi.psiUtil.getNonStrictParentOfType
-import org.jetbrains.kotlin.psi.psiUtil.getStrictParentOfType
 import org.jetbrains.kotlin.psi.psiUtil.parents
 import org.jetbrains.kotlin.psi.psiUtil.startOffset
 
@@ -16,18 +15,6 @@ private val multipleWhitespaces = Regex("\\s{2,}")
 
 internal fun PsiElement.searchName(): String {
     return this.namedUnwrappedElement?.name ?: "<UnknownName>"
-}
-
-internal fun PsiElement.searchClass(): String {
-    val classElement = this.getNonStrictParentOfType<KtClassOrObject>()
-    var className = classElement?.name
-    if (className != null && className == "Companion") {
-        val parentClassName = classElement?.getStrictParentOfType<KtClassOrObject>()?.name
-        if (parentClassName != null) {
-            className = "$parentClassName.$className"
-        }
-    }
-    return className ?: this.containingFile.fileName
 }
 
 /*
@@ -62,7 +49,7 @@ internal fun PsiElement.buildFullSignature(): String {
 }
 
 private fun PsiElement.extractClassName() =
-        this.getNonStrictParentOfType<KtClassOrObject>()?.nameAsSafeName?.asString() ?: ""
+    this.getNonStrictParentOfType<KtClassOrObject>()?.nameAsSafeName?.asString() ?: ""
 
 private fun PsiElement.searchSignature(): String {
     return when (this) {
@@ -106,23 +93,5 @@ private fun buildFunctionSignature(element: KtNamedFunction): String {
     require(methodStart < methodEnd) {
         "Error building function signature with range $methodStart - $methodEnd for element: ${element.text}"
     }
-    return getTextSafe(
-            { element.nameAsSafeName.identifier },
-            { element.text.substring(methodStart, methodEnd) })
-}
-
-/*
- * When analyzing sub path 'testData' of the kotlin project, CompositeElement.getText() throws
- * a RuntimeException stating 'Underestimated text length' - #65.
- */
-@Suppress("TooGenericExceptionCaught")
-internal fun getTextSafe(defaultValue: () -> String, block: () -> String) = try {
-    block()
-} catch (e: RuntimeException) {
-    val message = e.message
-    if (message != null && message.contains("Underestimated text length")) {
-        defaultValue() + "!<UnderestimatedTextLengthException>"
-    } else {
-        defaultValue()
-    }
+    return element.text.substring(methodStart, methodEnd)
 }

@@ -1,14 +1,26 @@
 plugins {
     `java-gradle-plugin`
-    id("com.gradle.plugin-publish") version "0.11.0"
+    id("com.gradle.plugin-publish") version "0.12.0"
+}
+
+repositories {
+    google()
 }
 
 dependencies {
-    implementation(kotlin("gradle-plugin"))
+    val androidGradlePlugin = "com.android.tools.build:gradle:4.0.1"
     implementation(kotlin("gradle-plugin-api"))
+    compileOnly(androidGradlePlugin)
+
+    testImplementation(project(":detekt-test-utils"))
+    testImplementation(kotlin("gradle-plugin"))
+    testImplementation(androidGradlePlugin)
 }
 
 gradlePlugin {
+    // hack to prevent building two jar's overwriting each other and leading to invalid signatures
+    // when publishing the Gradle plugin, this property must be present
+    isAutomatedPublishing = System.getProperty("automatePublishing")?.toBoolean() ?: false
     plugins {
         register("detektPlugin") {
             id = "io.gitlab.arturbosch.detekt"
@@ -25,7 +37,7 @@ pluginBundle {
     website = "https://detekt.github.io/detekt"
     vcsUrl = "https://github.com/detekt/detekt"
     description = "Static code analysis for Kotlin"
-    tags = listOf("kotlin", "detekt", "code-analysis", "linter", "codesmells")
+    tags = listOf("kotlin", "detekt", "code-analysis", "linter", "codesmells", "android")
 
     (plugins) {
         "detektPlugin" {

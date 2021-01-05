@@ -61,7 +61,7 @@ class ImplicitDefaultLocale(config: Config = Config.empty) : Rule(config) {
         checkCaseConversion(expression)
     }
 
-    fun checkStringFormatting(expression: KtQualifiedExpression) {
+    private fun checkStringFormatting(expression: KtQualifiedExpression) {
         if (expression.receiverExpression.text == "String" &&
             expression.getCalleeExpressionIfAny()?.text == "format" &&
             expression.containsStringTemplate()
@@ -74,7 +74,7 @@ class ImplicitDefaultLocale(config: Config = Config.empty) : Rule(config) {
         }
     }
 
-    fun checkCaseConversion(expression: KtQualifiedExpression) {
+    private fun checkCaseConversion(expression: KtQualifiedExpression) {
         if (isStringOrNullableString(expression.receiverExpression.getType(bindingContext)) &&
             expression.isCalleeCaseConversion() &&
             expression.isCalleeNoArgs()) {
@@ -99,6 +99,5 @@ private fun KtQualifiedExpression.containsStringTemplate(): Boolean {
     val lastCallExpression = lastChild as? KtCallExpression
     return lastCallExpression?.valueArguments
         ?.firstOrNull()
-        ?.children
-        ?.firstOrNull() is KtStringTemplateExpression
+        ?.run { children.firstOrNull() } is KtStringTemplateExpression
 }

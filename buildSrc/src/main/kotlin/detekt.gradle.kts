@@ -1,5 +1,6 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
+import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 
 plugins {
     id("io.gitlab.arturbosch.detekt")
@@ -8,7 +9,6 @@ plugins {
 val analysisDir = file(projectDir)
 val baselineFile = file("$rootDir/config/detekt/baseline.xml")
 val configFile = file("$rootDir/config/detekt/detekt.yml")
-val formatConfigFile = file("$rootDir/config/detekt/format.yml")
 val statisticsConfigFile = file("$rootDir/config/detekt/statistics.yml")
 
 val kotlinFiles = "**/*.kt"
@@ -27,6 +27,12 @@ subprojects {
     }
 
     detekt {
+        input = objects.fileCollection().from(
+            DetektExtension.DEFAULT_SRC_DIR_JAVA,
+            "src/test/java",
+            DetektExtension.DEFAULT_SRC_DIR_KOTLIN,
+            "src/test/kotlin"
+        )
         buildUponDefaultConfig = true
         baseline = baselineFile
 
@@ -42,6 +48,7 @@ allprojects {
 
     dependencies {
         detekt(project(":detekt-cli"))
+        detektPlugins(project(":custom-checks"))
         detektPlugins(project(":detekt-formatting"))
     }
 }
@@ -53,7 +60,7 @@ val detektFormat by tasks.registering(Detekt::class) {
     buildUponDefaultConfig = true
     autoCorrect = true
     setSource(analysisDir)
-    config.setFrom(listOf(statisticsConfigFile, formatConfigFile))
+    config.setFrom(listOf(statisticsConfigFile, configFile))
     include(kotlinFiles)
     include(kotlinScriptFiles)
     exclude(resourceFiles)

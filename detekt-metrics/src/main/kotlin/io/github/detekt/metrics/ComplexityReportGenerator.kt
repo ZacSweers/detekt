@@ -10,11 +10,6 @@ class ComplexityReportGenerator(private val complexityMetric: ComplexityMetric) 
     private var mccPerThousandLines = 0
     private var commentSourceRatio = 0
 
-    companion object Factory {
-        fun create(detektion: Detektion): ComplexityReportGenerator =
-            ComplexityReportGenerator(ComplexityMetric(detektion))
-    }
-
     fun generate(): List<String>? {
         if (cannotGenerate()) return null
         return listOf(
@@ -43,10 +38,15 @@ class ComplexityReportGenerator(private val complexityMetric: ComplexityMetric) 
             else -> {
                 numberOfSmells = complexityMetric.findings.sumBy { it.value.size }
                 smellPerThousandLines = numberOfSmells * 1000 / complexityMetric.lloc
-                mccPerThousandLines = complexityMetric.mcc!! * 1000 / complexityMetric.lloc
-                commentSourceRatio = complexityMetric.cloc!! * 100 / complexityMetric.sloc
+                mccPerThousandLines = requireNotNull(complexityMetric.mcc) * 1000 / complexityMetric.lloc
+                commentSourceRatio = requireNotNull(complexityMetric.cloc) * 100 / complexityMetric.sloc
                 false
             }
         }
+    }
+
+    companion object Factory {
+        fun create(detektion: Detektion): ComplexityReportGenerator =
+            ComplexityReportGenerator(ComplexityMetric(detektion))
     }
 }

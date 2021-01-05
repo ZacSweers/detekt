@@ -23,6 +23,7 @@ class StyleGuideProvider : DefaultRuleSetProvider {
     override fun instance(config: Config): RuleSet = RuleSet(
         ruleSetId,
         listOf(
+            ClassOrdering(config),
             CollapsibleIfStatements(config),
             ReturnCount(config),
             ThrowsCount(config),
@@ -80,7 +81,9 @@ class StyleGuideProvider : DefaultRuleSetProvider {
             LibraryEntitiesShouldNotBePublic(config),
             LibraryCodeMustSpecifyReturnType(config),
             UseArrayLiteralsInAnnotations(config),
-            UseEmptyCounterpart(config)
+            UseEmptyCounterpart(config),
+            UseCheckNotNull(config),
+            UseRequireNotNull(config)
         )
     )
 }

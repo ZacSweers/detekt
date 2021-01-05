@@ -42,6 +42,8 @@ equals null
 
 removes :Unit
 
+**Requires Type Resolution**
+
 **Debt**: 5m
 
 #### Noncompliant Code:

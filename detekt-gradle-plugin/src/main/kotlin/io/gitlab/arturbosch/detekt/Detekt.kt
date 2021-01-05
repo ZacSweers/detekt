@@ -1,11 +1,9 @@
 package io.gitlab.arturbosch.detekt
 
-import io.gitlab.arturbosch.detekt.extensions.CustomDetektReport
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import io.gitlab.arturbosch.detekt.extensions.DetektReport
 import io.gitlab.arturbosch.detekt.extensions.DetektReportType
 import io.gitlab.arturbosch.detekt.extensions.DetektReports
-import io.gitlab.arturbosch.detekt.internal.configurableFileCollection
 import io.gitlab.arturbosch.detekt.invoke.AutoCorrectArgument
 import io.gitlab.arturbosch.detekt.invoke.BaselineArgument
 import io.gitlab.arturbosch.detekt.invoke.BuildUponDefaultConfigArgument
@@ -38,9 +36,9 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
@@ -57,15 +55,10 @@ open class Detekt @Inject constructor(
 ) : SourceTask(), VerificationTask {
 
     @get:Classpath
-    val detektClasspath = project.configurableFileCollection()
+    val detektClasspath: ConfigurableFileCollection = objects.fileCollection()
 
     @get:Classpath
-    val pluginClasspath = project.configurableFileCollection()
-
-    @InputFiles
-    @SkipWhenEmpty
-    @PathSensitive(PathSensitivity.RELATIVE)
-    override fun getSource(): FileTree = super.getSource()
+    val pluginClasspath: ConfigurableFileCollection = objects.fileCollection()
 
     @get:InputFile
     @get:Optional
@@ -75,11 +68,11 @@ open class Detekt @Inject constructor(
     @get:InputFiles
     @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    val config: ConfigurableFileCollection = project.configurableFileCollection()
+    val config: ConfigurableFileCollection = objects.fileCollection()
 
     @get:Classpath
     @get:Optional
-    val classpath = project.configurableFileCollection()
+    val classpath: ConfigurableFileCollection = objects.fileCollection()
 
     @get:Input
     @get:Optional
@@ -135,11 +128,6 @@ open class Detekt @Inject constructor(
     @get:Internal
     internal val ignoreFailuresProp: Property<Boolean> = project.objects.property(Boolean::class.javaObjectType)
 
-    @Input
-    override fun getIgnoreFailures(): Boolean = ignoreFailuresProp.getOrElse(false)
-
-    override fun setIgnoreFailures(value: Boolean) = ignoreFailuresProp.set(value)
-
     @get:Internal
     internal val autoCorrectProp: Property<Boolean> = project.objects.property(Boolean::class.javaObjectType)
     var autoCorrect: Boolean
@@ -150,52 +138,50 @@ open class Detekt @Inject constructor(
     @get:Internal
     var reports = DetektReports()
 
-    fun reports(configure: Action<DetektReports>) = configure.execute(reports)
-
     @get:Internal
     val reportsDir: Property<File> = project.objects.property(File::class.java)
 
-    @Deprecated(
-        "Will be made internal in the future.",
-        replaceWith = ReplaceWith("reports.xml.destination")
-    )
-    val xmlReportFile: Provider<RegularFile>
+    internal val xmlReportFile: Provider<RegularFile>
         @OutputFile
         @Optional
         get() = getTargetFileProvider(reports.xml)
 
-    @Deprecated(
-        "Will be made internal in the future.",
-        replaceWith = ReplaceWith("reports.html.destination")
-    )
-    val htmlReportFile: Provider<RegularFile>
+    internal val htmlReportFile: Provider<RegularFile>
         @OutputFile
         @Optional
         get() = getTargetFileProvider(reports.html)
 
-    @Deprecated(
-        "Will be made internal in the future.",
-        replaceWith = ReplaceWith("reports.txt.destination")
-    )
-    val txtReportFile: Provider<RegularFile>
+    internal val txtReportFile: Provider<RegularFile>
         @OutputFile
         @Optional
         get() = getTargetFileProvider(reports.txt)
 
+    internal val customReportFiles: ConfigurableFileCollection
+        @OutputFiles
+        @Optional
+        get() = objects.fileCollection().from(reports.custom.mapNotNull { it.destination })
+
     private val defaultReportsDir: Directory = project.layout.buildDirectory.get()
         .dir(ReportingExtension.DEFAULT_REPORTS_DIR_NAME)
         .dir("detekt")
-
-    @Deprecated("Use reports {} to configure custom reports")
-    val customReports: Provider<Collection<CustomDetektReport>>
-        @Nested
-        get() = project.provider { reports.custom }
 
     init {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
     }
 
     private val invoker: DetektInvoker = DetektInvoker.create(project)
+
+    @InputFiles
+    @SkipWhenEmpty
+    @PathSensitive(PathSensitivity.RELATIVE)
+    override fun getSource(): FileTree = super.getSource()
+
+    @Input
+    override fun getIgnoreFailures(): Boolean = ignoreFailuresProp.getOrElse(false)
+
+    override fun setIgnoreFailures(value: Boolean) = ignoreFailuresProp.set(value)
+
+    fun reports(configure: Action<DetektReports>) = configure.execute(reports)
 
     @Suppress("DEPRECATION")
     @TaskAction
@@ -217,18 +203,7 @@ open class Detekt @Inject constructor(
             AutoCorrectArgument(autoCorrectProp.getOrElse(false)),
             DisableDefaultRuleSetArgument(disableDefaultRuleSetsProp.getOrElse(false))
         )
-        arguments.addAll(customReports.get().map {
-            val reportId = it.reportId
-            val destination = it.destination
-
-            checkNotNull(reportId) { "If a custom report is specified, the reportId must be present" }
-            check(!DetektReportType.isWellKnownReportId(reportId)) {
-                "The custom report reportId may not be same as one of the default reports"
-            }
-            checkNotNull(destination) { "If a custom report is specified, the destination must be present" }
-
-            CustomReportArgument(reportId, objects.fileProperty().getOrElse { destination })
-        })
+        arguments.addAll(convertCustomReportsToArguments())
 
         invoker.invokeCli(
             arguments = arguments.toList(),
@@ -236,6 +211,20 @@ open class Detekt @Inject constructor(
             classpath = detektClasspath.plus(pluginClasspath),
             taskName = name
         )
+    }
+
+    private fun convertCustomReportsToArguments(): List<CustomReportArgument> = reports.custom.map {
+        val reportId = it.reportId
+        val destination = it.destination
+
+        checkNotNull(reportId) { "If a custom report is specified, the reportId must be present" }
+        check(!DetektReportType.isWellKnownReportId(reportId)) {
+            "The custom report reportId may not be same as one of the default reports"
+        }
+        checkNotNull(destination) { "If a custom report is specified, the destination must be present" }
+        check(!destination.isDirectory) { "If a custom report is specified, the destination must be not a directory" }
+
+        CustomReportArgument(reportId, objects.fileProperty().getOrElse { destination })
     }
 
     private fun getTargetFileProvider(report: DetektReport): RegularFileProperty {

@@ -27,6 +27,8 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameOrNull
  * <compliant>
  * val pair = 1 to 2
  * </compliant>
+ *
+ * @requiresTypeResolution
  */
 class PreferToOverPairSyntax(config: Config = Config.empty) : Rule(config) {
     override val issue = Issue("PreferToOverPairSyntax", Severity.Style,
@@ -41,11 +43,11 @@ class PreferToOverPairSyntax(config: Config = Config.empty) : Rule(config) {
             callReference.getType(bindingContext)?.constructor?.declarationDescriptor as? ClassDescriptor ?: return
 
         if (subjectType.fqNameOrNull()?.asString() == PAIR_CONSTRUCTOR_REFERENCE_NAME) {
-            val (firstArg, secondArg) = callReference.valueArguments.map { it.text }
+            val arg = callReference.valueArguments.joinToString(" to ") { it.text }
 
             report(CodeSmell(issue, Entity.from(expression),
                     message = "Pair is created by using the pair constructor. " +
-                            "This can replaced by `$firstArg to $secondArg`"))
+                            "This can replaced by `$arg`"))
         }
 
         super.visitSimpleNameExpression(expression)

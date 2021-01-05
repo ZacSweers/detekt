@@ -2,6 +2,8 @@ package io.gitlab.arturbosch.detekt.formatting
 
 import com.pinterest.ktlint.core.EditorConfig
 import com.pinterest.ktlint.core.KtLint
+import io.github.detekt.psi.absolutePath
+import io.github.detekt.psi.fileName
 import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.api.CorrectableCodeSmell
 import io.gitlab.arturbosch.detekt.api.Debt
@@ -15,8 +17,6 @@ import io.gitlab.arturbosch.detekt.api.SourceLocation
 import io.gitlab.arturbosch.detekt.api.TextLocation
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.lang.FileASTNode
-import org.jetbrains.kotlin.com.intellij.psi.PsiElement
-import org.jetbrains.kotlin.com.intellij.testFramework.LightVirtualFile
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.psiUtil.endOffset
 
@@ -27,9 +27,6 @@ abstract class FormattingRule(config: Config) : Rule(config) {
 
     abstract val wrapping: com.pinterest.ktlint.core.Rule
 
-    protected fun issueFor(description: String) =
-        Issue(javaClass.simpleName, Severity.Style, description, Debt.FIVE_MINS)
-
     /**
      * Should the android style guide be enforced?
      * This property is read from the ruleSet config.
@@ -39,6 +36,9 @@ abstract class FormattingRule(config: Config) : Rule(config) {
 
     private var positionByOffset: (offset: Int) -> Pair<Int, Int> by SingleAssign()
     private var root: KtFile by SingleAssign()
+
+    protected fun issueFor(description: String) =
+        Issue(javaClass.simpleName, Severity.Style, description, Debt.FIVE_MINS)
 
     override fun visit(root: KtFile) {
         this.root = root
@@ -62,8 +62,7 @@ abstract class FormattingRule(config: Config) : Rule(config) {
             val location = Location(
                 SourceLocation(line, column),
                 TextLocation(node.startOffset, node.psi.endOffset),
-                "($line, $column)",
-                root.originalFilePath() ?: root.containingFile.name
+                root.absolutePath().toString()
             )
 
             // Nodes reported by 'NoConsecutiveBlankLines' are dangling whitespace nodes which means they have
@@ -74,14 +73,11 @@ abstract class FormattingRule(config: Config) : Rule(config) {
                 .takeIf { it.isNotEmpty() }
                 ?.plus(".")
                 ?: ""
-            val entity = Entity("", "", "$packageName${root.name}:$line", location, root)
+            val entity = Entity("", "$packageName${root.fileName}:$line", location, root)
             report(CorrectableCodeSmell(issue, entity, message, autoCorrectEnabled = autoCorrect))
         }
     }
 
     private fun ruleShouldOnlyRunOnFileNode(node: ASTNode) =
         wrapping is com.pinterest.ktlint.core.Rule.Modifier.RestrictToRoot && node !is FileASTNode
-
-    private fun PsiElement.originalFilePath() =
-        (this.containingFile.viewProvider.virtualFile as? LightVirtualFile)?.originalFile?.name
 }

@@ -10,11 +10,11 @@ redirect_from:
 summary:
 ---
 
-detekt requires Gradle 5.0 or higher.
+detekt requires Gradle 5.4 or higher.
 
 #### <a name="tasks">Available plugin tasks</a>
 
-The detekt Gradle plugin will generate multiple tasks
+The detekt Gradle plugin will generate multiple tasks:
 
 - `detekt` - Runs a detekt analysis and complexity report on your source files. Configure the analysis inside the 
 `detekt` closure. By default the standard rule set without any ignore list is executed on sources files located
@@ -25,6 +25,34 @@ The detekt Gradle plugin will generate multiple tasks
 - `detektBaseline` - Similar to `detekt`, but creates a code smell baseline. Further detekt runs will only feature new smells not in this list.
 - `detektIdeaFormat` - Uses a local `idea` installation to format your Kotlin (and other) code according to the specified `code-style.xml`.
 - `detektIdeaInspect` - Uses a local `idea` installation to run inspections on your Kotlin (and other) code according to the specified `inspections.xml` profile.
+
+In addition to these standard tasks, the plugin will also generate a set of experimental tasks that have
+[type resolution](type-resolution.md) enabled. This happens for both, pure JVM projects and Android projects that have
+the Android Gradle Plugin applied:
+
+- `detektMain` - Similar to `detekt`, but runs only on the `main` source set
+  (Android: all production source sets)
+- `detektTest` - Similar to `detekt`, but runs only on the `test` source set
+  (Android: all JVM and Android Test source sets)
+- `detektBaselineMain` - Similar to `detektBaseline`, but creates a baseline only for the `main` source set 
+  (Android: multiple baselines for all production source sets)
+- `detektBaselineTest` - Similar to `detektBaseline`, but creates a baseline only for the `test` source set
+  (Android: multiple baselines for all JVM and Android Test source sets)
+- Android-only: `detekt<Variant>` - Similar to `detekt`, but runs only on the specific (test) build variant
+- Android-only: `detektBaseline<Variant>` - Similar to `detektBaseline`, but creates a baseline only for the
+  specific (test) build variant
+  
+Baseline files that are generated for these specific source sets / build variants contain the name of the source set /
+the name of the build variant in their name, unless otherwise configured, such as `detekt-main.xml` or 
+`detekt-productionDebug.xml`.
+
+If both, a `detekt-main.xml` and a `detekt.xml` baseline file exists in place, the more specific one - `detekt-main.xml` -
+takes precendence when the `detektMain` task is executed, likewise for Android variant-specific baseline files.
+
+_NOTE:_ When analyzing Android projects that make use of specific code generators, such as Data Binding, Kotlin synthetic
+view accessors or else, you might see warnings output while Detekt runs. This is due to the inability to gather the
+complete compile classpath from the Android Gradle Plugin ([upstream ticket](https://issuetracker.google.com/issues/158777988))
+and can safely be ignored.
 
 Use the Groovy or Kotlin DSL of Gradle to apply the detekt Gradle Plugin. You can further configure the Plugin
 using the detekt closure as described [here](#closure).
@@ -40,18 +68,7 @@ plugins {
 }
 
 repositories {
-    jcenter()
-
-    // or
-
-    mavenCentral()
-    jcenter {
-        content {
-            // just allow to include kotlinx projects
-            // detekt needs 'kotlinx-html' for the html report
-            includeGroup "org.jetbrains.kotlinx"
-        }
-    }
+    jcenter() // jcenter is needed https://github.com/Kotlin/kotlinx.html/issues/81
 }
 ```
 
@@ -62,18 +79,7 @@ plugins {
 }
 
 repositories {
-    jcenter()
-
-    // or
-
-    mavenCentral()
-    jcenter {
-        content {
-            // just allow to include kotlinx projects
-            // detekt needs 'kotlinx-html' for the html report
-            includeGroup("org.jetbrains.kotlinx")
-        }
-    }
+    jcenter() // jcenter is needed https://github.com/Kotlin/kotlinx.html/issues/81
 }
 ```
 
@@ -93,18 +99,7 @@ buildscript {
 apply plugin: "io.gitlab.arturbosch.detekt"
 
 repositories {
-    jcenter()
-
-    // or
-
-    mavenCentral()
-    jcenter {
-        content {
-            // just allow to include kotlinx projects
-            // detekt needs 'kotlinx-html' for the html report
-            includeGroup "org.jetbrains.kotlinx"
-        }
-    }
+    jcenter() // jcenter is needed https://github.com/Kotlin/kotlinx.html/issues/81
 }
 ```
 
@@ -122,18 +117,7 @@ buildscript {
 apply(plugin = "io.gitlab.arturbosch.detekt")
 
 repositories {
-    jcenter()
-
-    // or
-
-    mavenCentral()
-    jcenter {
-        content {
-            // just allow to include kotlinx projects
-            // detekt needs 'kotlinx-html' for the html report
-            includeGroup("org.jetbrains.kotlinx")
-        }
-    }
+    jcenter() // jcenter is needed https://github.com/Kotlin/kotlinx.html/issues/81
 }
 ```
 
@@ -152,33 +136,46 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.0.0"
-        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:{{ site.detekt_version }}"
+        classpath "com.android.tools.build:gradle:4.0.1"
     }
 }
 
-apply plugin: "io.gitlab.arturbosch.detekt"
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android" version "1.4.0"
+    id "io.gitlab.arturbosch.detekt" version "{{ site.detekt_version }}"
+}
 
 repositories {
-    jcenter()
-
-    // or
-
-    mavenCentral()
-    jcenter {
-        content {
-            // just allow to include kotlinx projects
-            // detekt needs 'kotlinx-html' for the html report
-            includeGroup "org.jetbrains.kotlinx"
-        }
-    }
+    jcenter() // jcenter is needed https://github.com/Kotlin/kotlinx.html/issues/81
 }
 ```
 
 ###### Kotlin DSL
 ```kotlin
-// TODO
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:4.0.0")
+    }
+}
+
+plugins {
+    id("com.android.application")
+    kotlin("android") version "1.4.0"
+    id("io.gitlab.arturbosch.detekt") version "{{ site.detekt_version }}"
+}
+
+repositories {
+    jcenter() // jcenter is needed https://github.com/Kotlin/kotlinx.html/issues/81
+}
 ```
+
+For more information about how to configure the repositories read [about the repositories](#repositories)
 
 ##### <a name="closure">Options for detekt configuration closure</a>
 
@@ -197,6 +194,9 @@ detekt {
     disableDefaultRuleSets = false                        // Disables all default detekt rulesets and will only run detekt with custom rules defined in plugins passed in with `detektPlugins` configuration. `false` by default.
     debug = false                                         // Adds debug output during task execution. `false` by default.
     ignoreFailures = false                                // If set to `true` the build does not fail when the maxIssues count was reached. Defaults to `false`.
+    ignoredBuildTypes = ["release"]                       // Android: Don't create tasks for the specified build types (e.g. "release")
+    ignoredFlavors = ["production"]                       // Android: Don't create tasks for the specified build flavor (e.g. "production")
+    ignoredVariants = ["productionRelease"]               // Android: Don't create tasks for the specified build variants (e.g. "productionRelease")
     reports {
         xml {
             enabled = true                                // Enable/Disable XML report (default: true)
@@ -230,6 +230,9 @@ detekt {
     disableDefaultRuleSets = false                        // Disables all default detekt rulesets and will only run detekt with custom rules defined in plugins passed in with `detektPlugins` configuration. `false` by default.
     debug = false                                         // Adds debug output during task execution. `false` by default.
     ignoreFailures = false                                // If set to `true` the build does not fail when the maxIssues count was reached. Defaults to `false`.
+    ignoredBuildTypes = listOf("release")                 // Android: Don't create tasks for the specified build types (e.g. "release")
+    ignoredFlavors = listOf("production")                 // Android: Don't create tasks for the specified build flavor (e.g. "production")
+    ignoredVariants = listOf("productionRelease")         // Android: Don't create tasks for the specified build variants (e.g. "productionRelease")
     reports {
         xml {
             enabled = true                                // Enable/Disable XML report (default: true)
@@ -253,8 +256,8 @@ detekt {
 
 ##### Using Type Resolution
 
-Type resolution is experimental and works only for predefined `detektMain` and `detektTest` tasks or when implementing a 
-custom detekt task with the `classpath` and `jvmTarget` properties present.
+Type resolution is experimental and works only for [predefined tasks listed above](#a-nametasksavailable-plugin-tasksa)
+or when implementing a custom detekt task with the `classpath` and `jvmTarget` properties present.
 
 ###### Groovy DSL
 ```groovy
@@ -263,11 +266,9 @@ tasks.detekt.jvmTarget = "1.8"
 
 ###### Kotlin DSL
 ```kotlin
-tasks {
-    withType<Detekt> {
-        // Target version of the generated JVM bytecode. It is used for type resolution.
-        this.jvmTarget = "1.8"
-    }
+tasks.withType<Detekt>().configureEach {
+    // Target version of the generated JVM bytecode. It is used for type resolution.
+    this.jvmTarget = "1.8"
 }
 ```
 
@@ -283,7 +284,7 @@ detekt {
     ...
 }
 
-tasks.withType(io.gitlab.arturbosch.detekt.Detekt) {
+tasks.withType(io.gitlab.arturbosch.detekt.Detekt).configureEach {
     // include("**/special/package/**") // only analyze a sub package inside src/main/kotlin
     exclude("**/special/package/internal/**") // but exclude our legacy internal package
 }
@@ -295,7 +296,7 @@ detekt {
     ...
 }
 
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt> {
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     // include("**/special/package/**") // only analyze a sub package inside src/main/kotlin
     exclude("**/special/package/internal/**") // but exclude our legacy internal package
 }
@@ -308,7 +309,7 @@ uses the type `Detekt`.
 
 ###### Groovy DSL
 ```groovy
-task detektFailFast(type: io.gitlab.arturbosch.detekt.Detekt) {
+tasks.register(name: detektFailFast, type: io.gitlab.arturbosch.detekt.Detekt) {
     description = "Runs a failfast detekt build."
     source = files("src/main/java")
     config.from(files("$rootDir/config.yml"))
@@ -328,7 +329,7 @@ task detektFailFast(type: io.gitlab.arturbosch.detekt.Detekt) {
 
 ###### Kotlin DSL
 ```kotlin
-task<io.gitlab.arturbosch.detekt.Detekt>("detektFailFast") {
+tasks.register<io.gitlab.arturbosch.detekt.Detekt>("detektFailFast") {
     description = "Runs a failfast detekt build."
     source = files("src/main/kotlin", "src/test/kotlin")
     config = files("$rootDir/config.yml")
@@ -361,7 +362,7 @@ exclude detekt from the check task.
 
 ###### Kotlin DSL
 ```kotlin
-tasks.getByName("check") {
+tasks.named("check").configure {
     this.setDependsOn(this.dependsOn.filterNot {
         it is TaskProvider<*> && it.name == "detekt"
     })
@@ -375,3 +376,20 @@ Instead of disabling detekt for the check task, you may want to increase the bui
 detekt comes with an [IntelliJ Plugin](https://plugins.jetbrains.com/plugin/10761-detekt) that you can install directly from the IDE. The plugin offers warning highlight directly inside the IDE as well as support for code formatting.
 
 The source code of the plugin is available here: [detekt/detekt-intellij-plugin](https://github.com/detekt/detekt-intellij-plugin)
+
+#### <a name="repositories">About the repositories</a>
+
+If you prefer to use Maven Central instead of JCenter you can use this configuration:
+
+```kotlin
+repositories {
+    mavenCentral()
+    jcenter {
+        content {
+            // just allow to include kotlinx projects
+            // detekt needs 'kotlinx-html' for the html report
+            includeGroup("org.jetbrains.kotlinx")
+        }
+    }
+}
+```

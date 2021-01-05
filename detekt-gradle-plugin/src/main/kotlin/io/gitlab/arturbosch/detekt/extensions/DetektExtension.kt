@@ -1,13 +1,13 @@
 package io.gitlab.arturbosch.detekt.extensions
 
-import io.gitlab.arturbosch.detekt.internal.configurableFileCollection
 import org.gradle.api.Action
-import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.quality.CodeQualityExtension
 import java.io.File
+import javax.inject.Inject
 
-open class DetektExtension(project: Project) : CodeQualityExtension() {
+open class DetektExtension @Inject constructor(objects: ObjectFactory) : CodeQualityExtension() {
 
     var ignoreFailures: Boolean
         @JvmName("ignoreFailures_")
@@ -21,14 +21,13 @@ open class DetektExtension(project: Project) : CodeQualityExtension() {
         get() = reportsDir
 
     val reports = DetektReports()
-    fun reports(configure: Action<DetektReports>) = configure.execute(reports)
 
     var input: ConfigurableFileCollection =
-        project.configurableFileCollection().from(DEFAULT_SRC_DIR_JAVA, DEFAULT_SRC_DIR_KOTLIN)
+        objects.fileCollection().from(DEFAULT_SRC_DIR_JAVA, DEFAULT_SRC_DIR_KOTLIN)
 
     var baseline: File? = null
 
-    var config: ConfigurableFileCollection = project.configurableFileCollection()
+    var config: ConfigurableFileCollection = objects.fileCollection()
 
     var debug: Boolean = DEFAULT_DEBUG_VALUE
 
@@ -41,6 +40,25 @@ open class DetektExtension(project: Project) : CodeQualityExtension() {
     var disableDefaultRuleSets: Boolean = DEFAULT_DISABLE_RULESETS_VALUE
 
     var autoCorrect: Boolean = DEFAULT_AUTO_CORRECT_VALUE
+
+    /**
+     * List of Android build variants for which no detekt task should be created.
+     *
+     * This is a combination of build types and flavors, such as fooDebug or barRelease.
+     */
+    var ignoredVariants: List<String> = emptyList()
+
+    /**
+     * List of Android build types for which no detekt task should be created.
+     */
+    var ignoredBuildTypes: List<String> = emptyList()
+
+    /**
+     * List of Android build flavors for which no detekt task should be created
+     */
+    var ignoredFlavors: List<String> = emptyList()
+
+    fun reports(configure: Action<DetektReports>) = configure.execute(reports)
 
     companion object {
         const val DEFAULT_SRC_DIR_JAVA = "src/main/java"

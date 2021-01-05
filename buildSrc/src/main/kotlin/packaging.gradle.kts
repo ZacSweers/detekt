@@ -1,13 +1,24 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import groovy.lang.GroovyObject
-import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
-import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
 
 plugins {
     `java-library` apply false // is applied in commons; make configurations available in this script
     `maven-publish` apply false
-    `signing` apply false
-    id("com.jfrog.artifactory") apply false
+    signing apply false
+    id("io.codearte.nexus-staging")
+}
+
+val sonatypeUsername: String? = findProperty("sonatypeUsername")
+    ?.toString()
+    ?: System.getenv("MAVEN_CENTRAL_USER")
+val sonatypePassword: String? = findProperty("sonatypePassword")
+    ?.toString()
+    ?: System.getenv("MAVEN_CENTRAL_PW")
+
+nexusStaging {
+    packageGroup = "io.gitlab.arturbosch"
+    stagingProfileId = "1d8efc8232c5c"
+    username = sonatypeUsername
+    password = sonatypePassword
 }
 
 project(":detekt-cli") {
@@ -16,7 +27,7 @@ project(":detekt-cli") {
         plugin("com.github.johnrengelman.shadow")
     }
 
-    tasks.withType<ShadowJar>() {
+    tasks.withType<ShadowJar>().configureEach {
         mergeServiceFiles()
     }
 }
@@ -26,22 +37,24 @@ subprojects {
     apply {
         plugin("maven-publish")
         plugin("signing")
-        plugin("com.jfrog.artifactory")
     }
-
-    val bintrayUser = findProperty("bintrayUser")?.toString()
-        ?: System.getenv("BINTRAY_USER")
-    val bintrayKey = findProperty("bintrayKey")?.toString()
-        ?: System.getenv("BINTRAY_API_KEY")
 
     publishing {
         repositories {
             maven {
-                name = "bintray"
-                url = uri("https://api.bintray.com/maven/arturbosch/code-analysis/detekt/;publish=1;override=1")
+                name = "mavenCentral"
+                url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
                 credentials {
-                    username = bintrayUser
-                    password = bintrayKey
+                    username = sonatypeUsername
+                    password = sonatypePassword
+                }
+            }
+            maven {
+                name = "sonatypeSnapshot"
+                url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+                credentials {
+                    username = sonatypeUsername
+                    password = sonatypePassword
                 }
             }
         }
@@ -72,23 +85,6 @@ subprojects {
                 }
             }
         }
-    }
-
-    configure<ArtifactoryPluginConvention> {
-        setContextUrl("https://oss.jfrog.org/artifactory")
-        publish(delegateClosureOf<PublisherConfig> {
-            repository(delegateClosureOf<GroovyObject> {
-                setProperty("repoKey", "oss-snapshot-local")
-                setProperty("username", bintrayUser)
-                setProperty("password", bintrayKey)
-                setProperty("maven", true)
-            })
-            defaults(delegateClosureOf<GroovyObject> {
-                invokeMethod("publications", DETEKT_PUBLICATION)
-                setProperty("publishArtifacts", true)
-                setProperty("publishPom", true)
-            })
-        })
     }
 
     if (findProperty("signing.keyId") != null) {

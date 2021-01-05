@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.lexer.KtTokens.ENUM_KEYWORD
 import org.jetbrains.kotlin.lexer.KtTokens.EXPECT_KEYWORD
 import org.jetbrains.kotlin.lexer.KtTokens.EXTERNAL_KEYWORD
 import org.jetbrains.kotlin.lexer.KtTokens.FINAL_KEYWORD
+import org.jetbrains.kotlin.lexer.KtTokens.FUN_KEYWORD
 import org.jetbrains.kotlin.lexer.KtTokens.INFIX_KEYWORD
 import org.jetbrains.kotlin.lexer.KtTokens.INLINE_KEYWORD
 import org.jetbrains.kotlin.lexer.KtTokens.INNER_KEYWORD
@@ -69,7 +70,7 @@ class ModifierOrder(config: Config = Config.empty) : Rule(config) {
             VARARG_KEYWORD,
             SUSPEND_KEYWORD,
             INNER_KEYWORD,
-            ENUM_KEYWORD, ANNOTATION_KEYWORD,
+            ENUM_KEYWORD, ANNOTATION_KEYWORD, FUN_KEYWORD,
             COMPANION_KEYWORD,
             INLINE_KEYWORD,
             INFIX_KEYWORD,
