@@ -13,9 +13,8 @@ allprojects {
 
     repositories {
         jcenter()
-        maven {
-            setUrl("https://dl.bintray.com/spekframework/spek-dev")
-        }
+        maven("https://dl.bintray.com/spekframework/spek-dev")
+        google()
     }
 }
 
